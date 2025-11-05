@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Add after Tailwind import */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
