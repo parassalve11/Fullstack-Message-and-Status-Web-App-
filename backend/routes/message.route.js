@@ -13,7 +13,7 @@ router.get('/conversations',authenticateToken,getConversation)
 router.get('/conversation/:conversationId/messages',authenticateToken,getMessages);
 router.put('/messages/read',authenticateToken,markAsRead);
 
-router.delete('/message/:messageId',authenticateToken,deleteMessage);
+router.delete('/messages/:messageId',authenticateToken,deleteMessage);
 
 
 

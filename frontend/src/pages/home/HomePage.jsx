@@ -29,7 +29,7 @@ function HomePage() {
 
   
   
-console.log(allUser);
+
 
   return (
     <Layout>

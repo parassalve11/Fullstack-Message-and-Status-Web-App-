@@ -28,7 +28,7 @@ export const initializeSocket = (server) => {
     //handle user connection and show mark thrm online in db
 
     try {
-      socket.on("user_connection", async (connectionUserId) => {
+      socket.on("user_connected", async (connectionUserId) => {
         userId = connectionUserId; // taking userId from frontend throught props
         onlineUsers.set(userId, socket.id);
         socket.join(userId);
