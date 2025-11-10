@@ -67,7 +67,7 @@ export default function Layout({
               <ChatWindow
                 selectedContact={selectedContact}
                 setSelectedContact={setSelectedContact}
-                isMobile={isMobile}
+             
               />
             </Motion.div>
           )}

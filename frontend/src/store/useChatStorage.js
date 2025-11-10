@@ -43,7 +43,7 @@ export const useChatStorage = create((set, get) => ({
 
     socket.on("message_status_update", ({ messageId, messageStatus }) => {
       set((state) => ({
-        messages: state.messages.map((msg) => 
+        messages: state.messages.map((msg) =>
           msg._id === messageId ? { ...msg, messageStatus } : msg
         ),
       }));
@@ -53,7 +53,7 @@ export const useChatStorage = create((set, get) => ({
 
     socket.on("reaction_update", ({ messageId, reactions }) => {
       set((state) => ({
-        messages: state.messages.map((msg) => 
+        messages: state.messages.map((msg) =>
           msg._id === messageId ? { ...msg, reactions } : msg
         ),
       }));
@@ -63,9 +63,7 @@ export const useChatStorage = create((set, get) => ({
 
     socket.on("mesage_delected", ({ deletetMessageId }) => {
       set((state) => ({
-        messages: state.messages.filter((msg) => 
-          msg._id !== deletetMessageId
-        ),
+        messages: state.messages.filter((msg) => msg._id !== deletetMessageId),
       }));
     });
 
@@ -143,9 +141,7 @@ export const useChatStorage = create((set, get) => ({
     try {
       const { data } = await axiosInstance.get("/message/conversations");
 
-     
-        set({ conversations: data, loading: false });
-      
+      set({ conversations: data, loading: false });
 
       get().initializeSocketListners();
 
@@ -171,7 +167,7 @@ export const useChatStorage = create((set, get) => ({
         `/message/conversation/${conversationId}/messages`
       );
 
-      const messageArray = data.dada  ||data || [];
+      const messageArray = data.dada || data || [];
 
       set({
         messages: messageArray,
@@ -186,8 +182,8 @@ export const useChatStorage = create((set, get) => ({
 
       return messageArray;
     } catch (error) {
-      console.log("error while fetch messages",error);
-      
+      console.log("error while fetch messages", error);
+
       set({
         error: error?.response?.data?.message || error.message,
         loading: false,
@@ -222,6 +218,12 @@ export const useChatStorage = create((set, get) => ({
 
     //send tempory message before before actual message
 
+    const prev = Array.isArray(get().messages)
+      ? get().messages
+      : Array.isArray(get().messages?.data)
+      ? get().messages.data
+      : [];
+
     const temp_id = `id-${Date.now()}`;
 
     const optimisticMessage = {
@@ -241,9 +243,9 @@ export const useChatStorage = create((set, get) => ({
       messageStatus,
     };
 
-    set((state) => ({
-      messages: [...state.messages, optimisticMessage],
-    }));
+    set({
+      messages: [...prev, optimisticMessage],
+    });
 
     try {
       const { data } = await axiosInstance.post(
@@ -255,13 +257,11 @@ export const useChatStorage = create((set, get) => ({
       );
       const messageData = data.data || data;
 
-
       //repalce optimistics message with real-one
       set((state) => ({
         messages: state.messages.map((msg) =>
           msg._id === temp_id ? messageData : msg
         ),
-      
       }));
 
       return messageData;
@@ -271,7 +271,7 @@ export const useChatStorage = create((set, get) => ({
         messages: state.messages.map((msg) =>
           msg._id === temp_id ? { ...msg, messageStatus: "failed" } : msg
         ),
-          error: error?.response?.data?.message || error.message,
+        error: error?.response?.data?.message || error.message,
       }));
     }
   },
@@ -325,7 +325,7 @@ export const useChatStorage = create((set, get) => ({
 
   markMessageAsRead: async () => {
     const { messages, currentUser } = get();
-    if (!messages.length || !currentUser) return;
+    if (!messages?.length || !currentUser) return;
 
     const unreadIds = messages.filter(
       (msg) =>
@@ -380,7 +380,7 @@ export const useChatStorage = create((set, get) => ({
 
   //add or change the reaction
 
-  addReaction:  (messageId, emoji) => {
+  addReaction: (messageId, emoji) => {
     const socket = getSocket();
     const { currentUser } = get();
 
@@ -395,7 +395,7 @@ export const useChatStorage = create((set, get) => ({
 
   // start typing status
 
-  startTyping:  (receiverId) => {
+  startTyping: (receiverId) => {
     const socket = getSocket();
     const { currentConversation } = get();
 
@@ -409,7 +409,7 @@ export const useChatStorage = create((set, get) => ({
 
   // stop typing status
 
-  stopTyping:  (receiverId) => {
+  stopTyping: (receiverId) => {
     const socket = getSocket();
     const { currentConversation } = get();
 
@@ -423,12 +423,13 @@ export const useChatStorage = create((set, get) => ({
 
   // typing status
 
-  isTypingUser:  (userId) => {
+  isTypingUser: (userId) => {
     const { typingUsers, currentConversation } = get();
 
     if (
       !currentConversation ||
-      !typingUsers.has(currentConversation ) || !userId
+      !typingUsers.has(currentConversation) ||
+      !userId
     ) {
       return false;
     }
@@ -446,7 +447,7 @@ export const useChatStorage = create((set, get) => ({
 
   // get lastSeen of user
 
-  getUserLastSeen:  (userId) => {
+  getUserLastSeen: (userId) => {
     if (!userId) return null;
     const { onlineUsers } = get();
 

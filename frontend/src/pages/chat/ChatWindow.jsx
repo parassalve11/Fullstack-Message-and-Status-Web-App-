@@ -1,20 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import useThemeStorage from "../../store/useThemeStorage";
 import useUserStorage from "../../store/useUserStorage";
 import { useChatStorage } from "../../store/useChatStorage";
-import { isToday, isYesterday, format, isValid } from "date-fns";
+import { isToday, isYesterday, format } from "date-fns";
 import ChatWindowDefaultImage from "../../images/ChatWindowDeafultImage.png";
-import { ArrowLeft, Ellipsis, Lock, Video } from "lucide-react";
+import {
+  ArrowLeft,
+  Ellipsis,
+  FilePlusCorner,
+  ImagePlay,
+  Lock,
+  Paperclip,
+  Send,
+  SmilePlus,
+  Video,
+  X,
+} from "lucide-react";
 import MessageBubble from "./MessageBubble";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
-
-export const isValidDate = (value) => {
+const isValidDate = (value) => {
   const date = value instanceof Date ? value : new Date(value);
   return date instanceof Date && !isNaN(date.getTime());
 };
 
-
-function ChatWindow({ selectedContact, setSelectedContact, isMobile }) {
+function ChatWindow({ selectedContact, setSelectedContact }) {
   const [message, setMesage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showFileMenu, setShowFileMenu] = useState(false);
@@ -62,7 +73,7 @@ function ChatWindow({ selectedContact, setSelectedContact, isMobile }) {
 
   useEffect(() => {
     if (selectedContact?._id && conversations?.data?.length > 0) {
-      const conversation = conversations.data.find((conv) => 
+      const conversation = conversations.data.find((conv) =>
         conv.participants.some((p) => p?._id === selectedContact._id)
       );
 
@@ -70,17 +81,17 @@ function ChatWindow({ selectedContact, setSelectedContact, isMobile }) {
         fetchMessages(conversation?._id);
       }
     }
-  }, [selectedContact, conversations, fetchMessages]);
+  }, [selectedContact, conversations, fetchMessages ]);
 
-  //feteh conversations regularly
+  // feteh conversations regularly
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
 
-  //auto scroll down when message appear
+  // auto scroll down when message appear
 
   const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messageEndRef.current?.scrollIntoView({ behavior: "auto" });
   };
 
   useEffect(() => {
@@ -196,25 +207,44 @@ function ChatWindow({ selectedContact, setSelectedContact, isMobile }) {
     );
   };
 
-  //grouped messages
+//   //grouped messages
 
-const msgs = Array.isArray(messages?.data) ? messages.data : [];
+//   const groupedMessages = useMemo(() => {
+//   const msgs = Array.isArray(messages) ? messages : [];
 
-const groupedMessages = msgs.reduce((acc, msg) => {
-  if (!msg?.createdAt) return acc;
+//   return msgs.reduce((acc, msg) => {
+//     if (!msg?.createdAt) return acc;
 
-  const date = new Date(msg.createdAt);
-  if (!isValidDate(date)) return acc;
+//     const date = new Date(msg.createdAt);
+//     if (!isValidDate(date)) return acc;
 
-  const key = format(date, "yyyy-MM-dd");
-  if (!acc[key]) acc[key] = [];
-  acc[key].push(msg);
+//     const key = format(date, "yyyy-MM-dd");
+//     if (!acc[key]) acc[key] = [];
+//     acc[key].push(msg);
 
-  return acc;
-}, {});
+//     return acc;
+//   }, {});
+// }, [messages]);
 
-      console.log("Grouped Mesages",groupedMessages);
-      
+// const msgs = Array.isArray(messages) ? messages : [];
+
+// const groupedMessages = msgs.reduce((acc, msg) => {
+//   if (!msg.createdAt) return acc;
+
+//   const date = new Date(msg.createdAt);
+//   const key = format(date, "yyyy-MM-dd");
+
+//   if (!acc[key]) acc[key] = [];
+//   acc[key].push(msg);
+
+//   return acc;
+// }, {});
+
+
+
+
+  // console.log("Grouped Mesages", groupedMessages);
+
   console.log("messages", messages);
   // console.log("conversations", conversations);
 
@@ -265,7 +295,6 @@ const groupedMessages = msgs.reduce((acc, msg) => {
 
   // console.log("Selected Contact",selectedContact);
   // console.log("renderDateSeparator" , renderDateSeprator(new Date(Date.now())));
-  
 
   return (
     <div className="h-screen w-full flex flex-col">
@@ -289,9 +318,7 @@ const groupedMessages = msgs.reduce((acc, msg) => {
         />
 
         <div className="ml-3 flex-grow">
-          <h2 className="font-semibold ">
-            {selectedContact.username}
-          </h2>
+          <h2 className="font-semibold ">{selectedContact.username}</h2>
 
           {typing ? (
             <div>Typing...</div>
@@ -317,7 +344,7 @@ const groupedMessages = msgs.reduce((acc, msg) => {
         </div>
       </div>
 
-       <div
+       {/* <div
         className={`flex-1 p-4 overflow-y-auto ${
           theme === "dark" ? "bg-[#191a1a]" : "bg-[rgb(241,236,229)]"
         }`}
@@ -327,7 +354,9 @@ const groupedMessages = msgs.reduce((acc, msg) => {
             {renderDateSeprator(date)}
 
             {msgs
-              .filter((msg) => msg.conversation === selectedContact?.conversation?._id)
+              .filter(
+                (msg) => msg.conversation === selectedContact?.conversation?._id
+              )
               .map((msg) => (
                 <MessageBubble
                   key={msg._id || msg.temp_id}
@@ -338,11 +367,156 @@ const groupedMessages = msgs.reduce((acc, msg) => {
                   deleteMessage={deleteMessage}
                 />
               ))}
-
-          
           </React.Fragment>
         ))}
-          <div ref={messageEndRef} />
+        <div ref={messageEndRef} />
+      </div>  */}
+      <div
+  className={`flex-1 p-4 overflow-y-auto ${
+    theme === "dark" ? "bg-[#191a1a]" : "bg-[rgb(241,236,229)]"
+  }`}
+>
+ {(Array.isArray(messages) ? messages : messages?.data || [])
+  .filter(
+    (msg) => msg.conversation === selectedContact?.conversation?._id
+  )
+  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+  .map((msg, index, arr) => {
+    const currentDate = format(new Date(msg.createdAt), "yyyy-MM-dd");
+    const prevDate =
+      index > 0
+        ? format(new Date(arr[index - 1].createdAt), "yyyy-MM-dd")
+        : null;
+
+    const showDate = currentDate !== prevDate;
+
+    return (
+      <React.Fragment key={msg._id || msg.temp_id}>
+        {showDate && renderDateSeprator(new Date(msg.createdAt))}
+
+        <MessageBubble
+          message={msg}
+          theme={theme}
+          currentUser={user}
+          onReact={handleReaction}
+          deleteMessage={deleteMessage}
+        />
+      </React.Fragment>
+    );
+  })}
+
+
+  <div ref={messageEndRef} />
+</div>
+
+      {filePreview && (
+        <div className="relative p-4">
+          <img
+            src={filePreview}
+            className="w-80 object-cover mx-auto rounded-md"
+          />
+          <button
+            className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white font-semibold"
+            onClick={() => {
+              setSelectedFile(null), setFilePreview(null);
+            }}
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
+      <div
+        className={`relative p-3 flex items-center space-x-4 ${
+          theme === "dark" ? "bg-[#303430]" : "bg-white"
+        }`}
+      >
+        <button
+          className="focus:outline-none"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+        >
+          <SmilePlus
+            className={`size-6 ${
+              theme === "dark" ? "text-gray-400" : "text-gray-600 "
+            } `}
+          />
+        </button>
+
+        {showEmojiPicker && (
+          <div ref={emojiPickerRef} className="absolute left-0 bottom-16 z-50">
+            <Picker
+              data={data}
+              onEmojiSelect={(emojiObject) => {
+                setMesage((prev) => prev + emojiObject.native);
+                setShowEmojiPicker(false);
+              }}
+              theme={theme}
+            />
+          </div>
+        )}
+
+        <div className="relative">
+          <button
+            onClick={() => setShowFileMenu(!showFileMenu)}
+            className="focus:outline-none"
+          >
+            <Paperclip
+              className={`size-6 mt-2 ${
+                theme === "dark" ? "text-gray-400" : "text-gray-700"
+              }`}
+            />
+          </button>
+
+          {showFileMenu && (
+            <div
+              className={`absolute bottom-full left-0 mb-2 rounded-lg shadow-lg ${
+                theme === "dark" ? "bg-gray-700" : "bg-white"
+              }`}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*,video/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className={`flex items-center px-4 py-2 gap-2 w-full transition-colors  ${
+                  theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
+              >
+                <ImagePlay className="size-4" /> image/video
+              </button>
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className={`flex items-center px-4 py-2 gap-2 w-full transition-colors  ${
+                  theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                }`}
+              >
+                <FilePlusCorner className="size-4" /> Documents
+              </button>
+            </div>
+          )}
+        </div>
+        <input 
+        type="text"
+        value={message}
+        onChange={(e) => setMesage(e.target.value)}
+        onKeyPress={(e) =>{
+          if(e.key === "Enter"){
+            handleSendMessage()
+          }
+        }}
+        placeholder="Type a message ..."
+        className={`fle-grow w-full px-4 py-2 pl-5 border rounded-full foucs:outline-none focus:ring-2 focus:ring-green-500
+          ${theme === "dark" ? "bg-gray-700 text-white border-gray-300" :"bg-white text-black border-gray-700"}
+          `}
+        />
+
+        <button className="bg-green-500 hover:bg-green-600 rounded-md border px-1 py-1" onClick={handleSendMessage}>
+          <Send className="size-6 text-white" />
+        </button>
       </div>
     </div>
   );
