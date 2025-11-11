@@ -39,7 +39,9 @@ function HomePage() {
         transition={{ duration: 0.5 }}
         className="h-full"
       >
-        <ChatList contacts={allUser}  />
+      
+         <ChatList contacts={allUser}  />
+     
       </Motion.div>
     </Layout>
   );

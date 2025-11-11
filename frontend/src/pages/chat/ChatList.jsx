@@ -24,7 +24,7 @@ function ChatList({ contacts }) {
   
   return (
     <div
-      className={`w-full border-r h-screen ${
+      className={` w-full border-r h-screen ${
         theme === "dark"
           ? "bg-[rgb(17,27,23)] border-gray-600"
           : "bg-white border-gray-300"
@@ -106,7 +106,7 @@ function ChatList({ contacts }) {
                 <p
                   className={`text-xs ${
                     theme === "dark" ? "text-gray-400" : "text-gray-500"
-                  } truncate`}
+                  } truncate w-3xs line-clamp-1`}
                 >
                   {contact?.conversation?.lastMessage?.content}
                 </p>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useThemeStorage from "../../store/useThemeStorage";
 import useUserStorage from "../../store/useUserStorage";
 import { useChatStorage } from "../../store/useChatStorage";
@@ -42,14 +42,10 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
 
   const {
     conversations,
-    currentConversation,
     messages,
-    loading,
-    onlineUsers,
     fetchConversations,
     fetchMessages,
     sendMessage,
-    receiveMessage,
     deleteMessage,
     addReaction,
     startTyping,
@@ -57,7 +53,6 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
     isTypingUser,
     isUserOnline,
     getUserLastSeen,
-    cleanUp,
   } = useChatStorage();
 
   // user status like typing ,online , lastseen
@@ -81,7 +76,7 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
         fetchMessages(conversation?._id);
       }
     }
-  }, [selectedContact, conversations, fetchMessages ]);
+  }, [selectedContact, conversations, fetchMessages]);
 
   // feteh conversations regularly
   useEffect(() => {
@@ -207,41 +202,38 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
     );
   };
 
-//   //grouped messages
+  //   //grouped messages
 
-//   const groupedMessages = useMemo(() => {
-//   const msgs = Array.isArray(messages) ? messages : [];
+  //   const groupedMessages = useMemo(() => {
+  //   const msgs = Array.isArray(messages) ? messages : [];
 
-//   return msgs.reduce((acc, msg) => {
-//     if (!msg?.createdAt) return acc;
+  //   return msgs.reduce((acc, msg) => {
+  //     if (!msg?.createdAt) return acc;
 
-//     const date = new Date(msg.createdAt);
-//     if (!isValidDate(date)) return acc;
+  //     const date = new Date(msg.createdAt);
+  //     if (!isValidDate(date)) return acc;
 
-//     const key = format(date, "yyyy-MM-dd");
-//     if (!acc[key]) acc[key] = [];
-//     acc[key].push(msg);
+  //     const key = format(date, "yyyy-MM-dd");
+  //     if (!acc[key]) acc[key] = [];
+  //     acc[key].push(msg);
 
-//     return acc;
-//   }, {});
-// }, [messages]);
+  //     return acc;
+  //   }, {});
+  // }, [messages]);
 
-// const msgs = Array.isArray(messages) ? messages : [];
+  // const msgs = Array.isArray(messages) ? messages : [];
 
-// const groupedMessages = msgs.reduce((acc, msg) => {
-//   if (!msg.createdAt) return acc;
+  // const groupedMessages = msgs.reduce((acc, msg) => {
+  //   if (!msg.createdAt) return acc;
 
-//   const date = new Date(msg.createdAt);
-//   const key = format(date, "yyyy-MM-dd");
+  //   const date = new Date(msg.createdAt);
+  //   const key = format(date, "yyyy-MM-dd");
 
-//   if (!acc[key]) acc[key] = [];
-//   acc[key].push(msg);
+  //   if (!acc[key]) acc[key] = [];
+  //   acc[key].push(msg);
 
-//   return acc;
-// }, {});
-
-
-
+  //   return acc;
+  // }, {});
 
   // console.log("Grouped Mesages", groupedMessages);
 
@@ -297,7 +289,7 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
   // console.log("renderDateSeparator" , renderDateSeprator(new Date(Date.now())));
 
   return (
-    <div className="h-screen w-full flex flex-col">
+    <div className="  h-screen w-full   flex flex-col">
       <div
         className={`flex items-center p-4 ${
           theme === "dark"
@@ -344,70 +336,43 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
         </div>
       </div>
 
-       {/* <div
-        className={`flex-1 p-4 overflow-y-auto ${
+      
+      <div
+        className={`flex-1 p-4 overflow-y-auto  ${
           theme === "dark" ? "bg-[#191a1a]" : "bg-[rgb(241,236,229)]"
         }`}
       >
-        {Object.entries(groupedMessages).map(([date, msgs]) => (
-          <React.Fragment key={date}>
-            {renderDateSeprator(date)}
+        {(Array.isArray(messages) ? messages : messages?.data || [])
+          .filter(
+            (msg) => msg.conversation === selectedContact?.conversation?._id
+          )
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+          .map((msg, index, arr) => {
+            const currentDate = format(new Date(msg.createdAt), "yyyy-MM-dd");
+            const prevDate =
+              index > 0
+                ? format(new Date(arr[index - 1].createdAt), "yyyy-MM-dd")
+                : null;
 
-            {msgs
-              .filter(
-                (msg) => msg.conversation === selectedContact?.conversation?._id
-              )
-              .map((msg) => (
+            const showDate = currentDate !== prevDate;
+
+            return (
+              <React.Fragment key={msg._id || msg.temp_id}>
+                {showDate && renderDateSeprator(new Date(msg.createdAt))}
+
                 <MessageBubble
-                  key={msg._id || msg.temp_id}
                   message={msg}
                   theme={theme}
                   currentUser={user}
                   onReact={handleReaction}
                   deleteMessage={deleteMessage}
                 />
-              ))}
-          </React.Fragment>
-        ))}
+              </React.Fragment>
+            );
+          })}
+
         <div ref={messageEndRef} />
-      </div>  */}
-      <div
-  className={`flex-1 p-4 overflow-y-auto ${
-    theme === "dark" ? "bg-[#191a1a]" : "bg-[rgb(241,236,229)]"
-  }`}
->
- {(Array.isArray(messages) ? messages : messages?.data || [])
-  .filter(
-    (msg) => msg.conversation === selectedContact?.conversation?._id
-  )
-  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-  .map((msg, index, arr) => {
-    const currentDate = format(new Date(msg.createdAt), "yyyy-MM-dd");
-    const prevDate =
-      index > 0
-        ? format(new Date(arr[index - 1].createdAt), "yyyy-MM-dd")
-        : null;
-
-    const showDate = currentDate !== prevDate;
-
-    return (
-      <React.Fragment key={msg._id || msg.temp_id}>
-        {showDate && renderDateSeprator(new Date(msg.createdAt))}
-
-        <MessageBubble
-          message={msg}
-          theme={theme}
-          currentUser={user}
-          onReact={handleReaction}
-          deleteMessage={deleteMessage}
-        />
-      </React.Fragment>
-    );
-  })}
-
-
-  <div ref={messageEndRef} />
-</div>
+      </div>
 
       {filePreview && (
         <div className="relative p-4">
@@ -499,22 +464,29 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
             </div>
           )}
         </div>
-        <input 
-        type="text"
-        value={message}
-        onChange={(e) => setMesage(e.target.value)}
-        onKeyPress={(e) =>{
-          if(e.key === "Enter"){
-            handleSendMessage()
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMesage(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              handleSendMessage();
+            }
+          }}
+          placeholder="Type a message ..."
+          className={`fle-grow w-full px-4 py-2 pl-5 border rounded-full foucs:outline-none focus:ring-2 focus:ring-green-500
+          ${
+            theme === "dark"
+              ? "bg-gray-700 text-white border-gray-300"
+              : "bg-white text-black border-gray-700"
           }
-        }}
-        placeholder="Type a message ..."
-        className={`fle-grow w-full px-4 py-2 pl-5 border rounded-full foucs:outline-none focus:ring-2 focus:ring-green-500
-          ${theme === "dark" ? "bg-gray-700 text-white border-gray-300" :"bg-white text-black border-gray-700"}
           `}
         />
 
-        <button className="bg-green-500 hover:bg-green-600 rounded-md border px-1 py-1" onClick={handleSendMessage}>
+        <button
+          className="bg-green-500 hover:bg-green-600 rounded-md border px-1 py-1"
+          onClick={handleSendMessage}
+        >
           <Send className="size-6 text-white" />
         </button>
       </div>

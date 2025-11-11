@@ -36,7 +36,7 @@ export default function Layout({
 
   return (
     <div
-      className={`min-h-screen flex relative ${
+      className={`min-h-screen  flex relative ${
         theme === "dark" ? "bg-[#111b21] text-white" : "bg-gray-100 text-black"
       }`}
     >
@@ -62,7 +62,7 @@ export default function Layout({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween" }}
-              className={`w-full h-full`}
+              className={`w-full h-full `}
             >
               <ChatWindow
                 selectedContact={selectedContact}
