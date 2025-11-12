@@ -57,6 +57,7 @@ export const sendMessage = async (req, res) => {
       messageStatus,
     });
 
+    // await message.populate("sender receiver");
     await message.save();
 
     if (message.content) {
@@ -74,9 +75,11 @@ export const sendMessage = async (req, res) => {
     //emit sockets
 
     if (req.io && req.socketUserMap) {
+      const senderSocketId = req.socketUserMap.get(senderId);
       const receiverSocketId = req.socketUserMap.get(receiverId);
       //real time message with socket events
-      if (receiverSocketId) {
+      if (receiverSocketId || senderSocketId) {
+        req.io.to(senderSocketId).emit("send_message", populatedMessage);
         req.io.to(receiverSocketId).emit("receive_message", populatedMessage);
         message.messageStatus = "delivered";
         await message.save();

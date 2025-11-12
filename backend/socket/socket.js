@@ -64,10 +64,17 @@ export const initializeSocket = (server) => {
 
     socket.on("send_message", async (message) => {
       try {
+        const senderSocketId = onlineUsers.get(message?.sender?._id);
         const receiverSocketId = onlineUsers.get(message?.receiver?._id);
+
+        if (senderSocketId) {
+          io.to(senderSocketId).emit("send_message", message);
+        }
+        
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("recevie_message", message);
         }
+        
       } catch (error) {
         console.error(
           "Error while sending message to reciver in socket",

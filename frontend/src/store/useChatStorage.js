@@ -27,7 +27,7 @@ export const useChatStorage = create((set, get) => ({
 
     //listen for incoming messages
 
-    socket.on("receive_message", (message) => {});
+    // socket.on("receive_message", (message) => {});
 
     //confrom message delivery
 
@@ -228,8 +228,8 @@ export const useChatStorage = create((set, get) => ({
 
     const optimisticMessage = {
       _id: temp_id,
-      sender: { _id: senderId },
-      receiver: { _id: receiverId },
+      sender: senderId,
+      receiver: receiverId,
       conversation: conversationId,
       imageOrVideoUrl:
         media && typeof media !== "string" ? URL.createObjectURL(media) : null,
