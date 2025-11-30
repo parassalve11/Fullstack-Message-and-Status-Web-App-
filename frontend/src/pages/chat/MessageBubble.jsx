@@ -1,9 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ChatMessage } from "../../components/ui/ChatBubble"; // <-- same file
-import useUserStorage from "../../store/useUserStorage";
+import React, { useRef, useState } from "react";
+
 import { format } from "date-fns";
-import { Check, CheckCheck, EllipsisVertical, SmileIcon } from "lucide-react";
-import {motion as Motion} from 'framer-motion'
+import {
+  Check,
+  CheckCheck,
+  Copy,
+  EllipsisVertical,
+  Plus,
+  SmileIcon,
+  Trash2,
+  X,
+} from "lucide-react";
+
+import useOutsideClick from "../../hooks/useOutsideClick";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 function MessageBubble({
   message,
@@ -21,37 +32,27 @@ function MessageBubble({
   const reactionMenuRef = useRef(null);
   const emojiPickerRef = useRef(null);
 
-  const { user } = useUserStorage();
-  const quickReactions = [
-    "👍",
-    "❤️",
-    "😂",
-    "🔥",
-    "😮",
-    "😢",
-    "👏",
-    "🙏",
-    "💯",
-    "🎉",
-  ];
+ 
+  const quickReactions = ["👍", "❤️", "😂", "🙏", "💯", "🎉"];
 
   const senderId = message?.sender?._id ?? message?.sender;
   const isUserMessage = String(currentUser?._id) === String(senderId);
-
-  //  if(!isUserMessage) return
-
-  console.log("isUserMessage", isUserMessage);
-  console.log("message.sender._id", message?.sender?._id);
-  console.log("currentUser", currentUser._id);
-
-  console.log("type of currentUser_id", typeof currentUser._id);
-  console.log("type of sender", typeof message?.sender?._id);
 
   const handleReact = (emoji) => {
     onReact(message?._id, emoji);
     setShowEmojiPicker(false);
     setShowReaction(false);
   };
+
+  useOutsideClick(emojiPickerRef, () => {
+    if (showEmojiPicker) setShowEmojiPicker(false);
+  });
+  useOutsideClick(reactionMenuRef, () => {
+    if (showReaction) setShowReaction(false);
+  });
+  useOutsideClick(optionRef, () => {
+    if (showOptions) setShowOptions(false);
+  });
 
   if (!message) return null;
 
@@ -111,24 +112,124 @@ function MessageBubble({
             <EllipsisVertical className="size-4 " />
           </button>
         </div>
-       <div
-  className={`absolute flex flex-col gap-2
-    ${isUserMessage ? "-left-5" : "-right-5"}
+        <div
+          className={`absolute 
+    ${isUserMessage ? "-left-10" : "-right-10"}
     top-1/2 -translate-y-1/2 
     opacity-0 group-hover:opacity-100
-    transform transition-all duration-300 ease-out
-    ${isUserMessage ? "group-hover:-translate-x-2" : "group-hover:translate-x-2"}
+    transform  duration-300 ease-out flex-col gap-2
+    ${
+      isUserMessage ? "group-hover:-translate-x-2" : "group-hover:translate-x-2"
+    }
   `}
->
-  <button>
-    <SmileIcon
-      className={`size-5 ${
-        theme === "dark" ? "text-gray-300" : "text-gray-600"
-      }`}
-    />
-  </button>
-</div>
+        >
+          <button
+            onClick={() => setShowReaction(!showReaction)}
+            className={`p-2 rounded-full ${
+              theme === "dark" ? "bg-[#2c2233] " : "bg-white hover:bg-gray-100"
+            }`}
+          >
+            <SmileIcon
+              className={`size-5 ${
+                theme === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            />
+          </button>
+        </div>
 
+        {showReaction && (
+          <div
+            ref={reactionMenuRef}
+            className={`absolute -top-8 max-w-xl ${
+              isUserMessage ? "left-0" : " left-36"
+            } transform -translate-x-1/2 flex items-center bg-[#202c33]/90 px-2 py-1.5 shadow-lg rounded-full gap-1 z-50 `}
+          >
+            {quickReactions.map((emoji, index) => (
+              <button
+                key={index}
+                onClick={() => handleReact(emoji)}
+                className="hover:scale-125 transition-transform p-1 "
+              >
+                {emoji}
+              </button>
+            ))}
+            <div className="w-[1px] h-5 bg-gray-600 mx-1" />
+            <button
+              className="hover:bg-[#ffffff1a] rounded-full p-1"
+              onClick={() => setShowEmojiPicker(true)}
+            >
+              <Plus className="size-4 text-gray-400 " />
+            </button>
+          </div>
+        )}
+        {showEmojiPicker && (
+          <div ref={emojiPickerRef} className="absolute left-0 mb-6 z-50">
+            <div className="relative">
+              <Picker
+                data={data}
+                onEmojiSelect={(emojiObject) => handleReact(emojiObject.native)}
+                theme={theme}
+              />
+              <button
+                onClick={() => setShowEmojiPicker(false)}
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700 "
+              >
+                <X />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {message.reactions && message.reactions.length > 0 && (
+          <div
+            className={`absolute -bottom-5 ${
+              isUserMessage ? "right-2" : "left-2"
+            } ${
+              theme === "dark" ? "bg-[#2a3942]" : "bg-gray-200"
+            } rounded-full px-2 shadow-md z-20`}
+          >
+            {message.reactions.map((reaction, index) => (
+              <span key={index} className="mr-1">
+                {reaction.emoji}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {showOptions && (
+          <div
+            ref={optionRef}
+            className={`absolute top-8 right-1 z-20 w-36  rounded-xl shadow-lg  py-2 text-sm ${
+              theme === "dark"
+                ? "bg-gray-700 hover:bg-gray-600"
+                : "bg-gray-400 hover:bg-gray-300"
+            }`}
+          >
+            <button
+              className="flex items-center w-full px-4 py-2 gap-4 rounded-lg"
+              onClick={() => {
+                if (message.contentType === "text") {
+                  navigator.clipboard.writeText(message?.content);
+                }
+                setShowOptions(false);
+              }}
+            >
+              <Copy className="size-4" />
+              <span>Copy</span>
+            </button>
+            {isUserMessage && (
+              <button
+                className="flex items-center w-full px-4 py-2 gap-4 rounded-lg text-red-500"
+                onClick={() => {
+                  deleteMessage(message?._id), setShowOptions(false);
+                }}
+              >
+                <Trash2 className="size-4" />
+                <span>Delete</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

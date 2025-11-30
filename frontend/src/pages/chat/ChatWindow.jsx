@@ -202,46 +202,15 @@ function ChatWindow({ selectedContact, setSelectedContact }) {
     );
   };
 
-  //   //grouped messages
+  
 
-  //   const groupedMessages = useMemo(() => {
-  //   const msgs = Array.isArray(messages) ? messages : [];
 
-  //   return msgs.reduce((acc, msg) => {
-  //     if (!msg?.createdAt) return acc;
 
-  //     const date = new Date(msg.createdAt);
-  //     if (!isValidDate(date)) return acc;
 
-  //     const key = format(date, "yyyy-MM-dd");
-  //     if (!acc[key]) acc[key] = [];
-  //     acc[key].push(msg);
 
-  //     return acc;
-  //   }, {});
-  // }, [messages]);
-
-  // const msgs = Array.isArray(messages) ? messages : [];
-
-  // const groupedMessages = msgs.reduce((acc, msg) => {
-  //   if (!msg.createdAt) return acc;
-
-  //   const date = new Date(msg.createdAt);
-  //   const key = format(date, "yyyy-MM-dd");
-
-  //   if (!acc[key]) acc[key] = [];
-  //   acc[key].push(msg);
-
-  //   return acc;
-  // }, {});
-
-  // console.log("Grouped Mesages", groupedMessages);
-
-  console.log("messages", messages);
-  // console.log("conversations", conversations);
-
-  //handle add reaction
-  const handleReaction = ({ messageId, emoji }) => {
+  const handleReaction = ( messageId, emoji ) => {
+    console.log(messageId,emoji);
+    
     addReaction(messageId, emoji);
   };
 

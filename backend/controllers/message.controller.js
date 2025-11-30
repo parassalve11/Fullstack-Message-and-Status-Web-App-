@@ -219,7 +219,7 @@ export const deleteMessage = async (req, res) => {
       return response(res, 404, "Message not Found");
     }
 
-    if (message.sender.toString() !== userId) {
+    if (message.sender.toString() !== userId.toString()) {
       return response(res, 403, "Not authorized to delete this message");
     }
 

@@ -76,7 +76,7 @@ export default function Layout({
       {isMobile && <Sidebar />}
       {isThemeDialogOpen && (
         <div
-          className={`fixed insert-0 flex items-center justify-center bg-black bg-opacity-50 z-50`}
+          className={`fixed h-screen w-full insert-0 flex items-center justify-center bg-transparent bg-opacity-50 z-50`}
         >
           <div
             className={`${

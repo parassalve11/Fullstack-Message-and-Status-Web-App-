@@ -24,6 +24,7 @@ export const useChatStorage = create((set, get) => ({
     socket.off("send_message");
     socket.off("message_error");
     socket.off("mesage_delected");
+    socket.off("reaction_update");
 
     //listen for incoming messages
 
@@ -51,13 +52,30 @@ export const useChatStorage = create((set, get) => ({
 
     //handle reactions on messages
 
-    socket.on("reaction_update", ({ messageId, reactions }) => {
-      set((state) => ({
-        messages: state.messages.map((msg) =>
-          msg._id === messageId ? { ...msg, reactions } : msg
-        ),
-      }));
-    });
+  
+socket.on("reaction_update", (payload) => {
+  if (!payload || !payload.messageId || !Array.isArray(payload.reactions)) {
+    console.warn("Invalid reaction payload:", payload);
+    return;
+  }
+
+  set((state) => {
+    const list = Array.isArray(state.messages)
+      ? state.messages
+      : Array.isArray(state.messages?.data)
+      ? state.messages.data
+      : [];
+
+    return {
+      messages: list.map((msg) =>
+        msg._id.toString() === payload.messageId.toString()
+          ? { ...msg, reactions: payload.reactions }
+          : msg
+      ),
+    };
+  });
+});
+
 
     //handle remove message from local storage
 

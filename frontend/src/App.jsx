@@ -13,6 +13,7 @@ import StatusPage from "./pages/status/StatusPage";
 import useUserStorage from "./store/useUserStorage";
 import { disconnectSocket, initializeSocket } from "./services/chat.service";
 import { useChatStorage } from "./store/useChatStorage";
+import SettingPage from "./pages/settings/SettingPage";
 
 function App() {
   const { user } = useUserStorage();
@@ -45,6 +46,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/user-profile" element={<UserDetails />} />
           <Route path="/status" element={<StatusPage />} />
+          <Route path="/settings" element={<SettingPage />} />
         </Route>
       </Routes>
     </Router>
